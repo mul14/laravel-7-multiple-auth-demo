@@ -14,5 +14,36 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('login');
+});
+
+Route::post('/login', function () {
+    $guard = request('guard');
+
+    $credentials = [
+        'username' => request('username'),
+        'password' => request('password'),
+    ];
+
+    $authGuard = auth($guard);
+
+    if ($authGuard->attempt($credentials)) {
+        session()->put('guard', $guard);
+
+        return redirect('/dashboard');
+    }
+
+    return back()->withInput()->withMessage('Invalid credentials');
+});
+
+
+Route::get('/dashboard', function() {
+    // dd(auth()->user());
+    return view('dashboard');
+});
+
+Route::post('/logout', function() {
+    auth(session()->get('guard'))->logout();
+
+    return redirect('/');
 });
